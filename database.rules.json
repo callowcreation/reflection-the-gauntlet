@@ -1,0 +1,9 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "full_keyed": {
+      ".indexOn": ["last_word"]
+    }
+  }
+}
