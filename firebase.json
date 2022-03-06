@@ -1,4 +1,7 @@
 {
+  "functions": {
+    "runtime": "nodejs16"
+  },
   "database": {
     "rules": "database.rules.json"
   },
