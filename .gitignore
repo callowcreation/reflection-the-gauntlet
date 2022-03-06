@@ -8,7 +8,6 @@ firebase-debug.log*
 firebase-debug.*.log*
 
 serviceAccountKey.json
-**/reflection-the-gauntlet-default-rtdb.json
 # Firebase cache
 .firebase/
 
