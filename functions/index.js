@@ -1,4 +1,7 @@
 // NFG Pleads32 http://dumbideas.xyz/billy/week-52/myNFG.html?id=v8YwH6Nq2s
+/*const { initializeApp, cert } = require('firebase-admin/app');
+const { getStorage } = require('firebase-admin/storage');
+const { getDatabase } = require('firebase-admin/database');*/
 
 const functions = require("firebase-functions");
 
@@ -7,11 +10,16 @@ const express = require('express');
 const cors = require('cors');
 
 const serviceAccount = require('./serviceAccountKey.json');
+const e = require("cors");
 
 firebase.initializeApp({
     credential: firebase.credential.cert(serviceAccount),
-    databaseURL: 'https://reflection-the-gauntlet-default-rtdb.firebaseio.com'
+    databaseURL: 'https://reflection-the-gauntlet-default-rtdb.firebaseio.com',
+    storageBucket: 'reflection-the-gauntlet.appspot.com'
 });
+
+const database = firebase.database();
+const storage = firebase.storage();
 
 const app = express();
 app.use(cors({ origin: true }));
@@ -31,10 +39,10 @@ function shuffle(array) {
 }
 
 async function generate(couplets) {
-    const refKeyed = firebase.database().ref('full_keyed');
-    const refRhymes = firebase.database().ref('rhymes');
+    const refKeyed = database.ref('full_keyed');
+    const refRhymes = database.ref('rhymes');
 
-    const refLastWords = firebase.database().ref('last_words');
+    const refLastWords = database.ref('last_words');
     const lastWords = (await refLastWords.once('value').then(snap => snap.val())).filter(x => x);
 
     shuffle(lastWords);
@@ -67,8 +75,45 @@ async function generate(couplets) {
     return poemLines;
 }
 
-app.get('/poems', async (req, res) => {
+app.get('/get-poem', async (req, res) => {
     
+    const topic = req.query.topic;
+    const bucket = storage.bucket();
+
+    const poemFile = bucket.file(`poems/${topic}.txt`);
+    const poemImage = bucket.file(`images/${topic}.png`);
+    const poemImageUrl = poemImage.publicUrl();
+    try {
+        const data = await poemFile.download({ validation: false }).then(file => {
+            const text = file.toString('utf8');
+            return {
+                topic,
+                text,
+                imageUrl: poemImageUrl
+            };
+        });
+        if (data) {
+            res.json(data);
+        } else {
+            res.status(404).send(`The poem for The Gauntlet ${topic} was not found.`);
+        }
+    } catch (err) {
+        res.status(500).send(error.message);
+    }
+});
+
+app.get('/poems-info', async (req, res) => {
+    const refKeyed = database.ref('full_keyed');
+    const linesCount = await refKeyed.once('value').then(s => s.numChildren());
+
+    const refLastWords = database.ref('last_words');
+    const lastWords = (await refLastWords.once('value').then(snap => snap.val())).filter(x => x);
+
+    res.json({ linesCount, lastWords });
+});
+
+app.get('/poems', async (req, res) => {
+
     const couplets = +req.query.couplets || 5;
     const items = await generate(couplets);
 

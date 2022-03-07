@@ -2,112 +2,318 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Reflection - The Gauntlet</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reflection - The Gauntlet</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="jquery-3.3.1.min.js"></script>
 
-  <script src="jquery-3.3.1.min.js"></script>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+        }
 
-  <style>
-    .item-line {
-      font-size: 150%;
-    }
+        .item-line {
+            font-size: 120%;
+            text-align: center;
+        }
 
-    .item-info {
-      font-size: 80%;
-      font-weight: bolder;
-      color: rgb(132, 0, 255);
-    }
+        .item-info {
+            font-size: 70%;
+            font-weight: bolder;
+            color: rgb(155, 93, 212);
+            cursor: pointer;
+            text-decoration: underline;
+        }
 
-    .center {
-      margin: auto;
-      width: 50%;
-      padding: 10px;
-    }
-  </style>
+        #last-words-items {
+            margin-bottom: 50px;
+        }
+
+        #poem-popup {
+            display: none;
+            position: relative;
+            top: 10px;
+            width: 90%;
+            height: 90%;
+            z-index: 100;
+            background-color: black;
+            text-align: center;
+        }
+
+        #close-x {
+            font-size: 200%;
+            color: red;
+            cursor: pointer;
+            border: 2px solid rgba(255, 0, 0, 0.308);
+            padding-left: 5px;
+            padding-right: 5px;
+            position: absolute; 
+            right: 20px; 
+            top: 20px;
+        }
+
+        #poem-image-icon {
+            font-size: 200%;
+            cursor: pointer;
+            padding-left: 5px;
+            padding-right: 5px;
+            position: absolute; 
+            right: 60px; 
+            top: 17px; 
+            font-size:48px; 
+            color:green
+        }
+
+        #poem-image-icon-close {
+            font-size: 200%;
+            cursor: pointer;
+            padding-left: 5px;
+            padding-right: 5px;
+            position: absolute; 
+            right: 60px; 
+            top: 17px; 
+            font-size:48px; 
+            color:red
+        }
+
+        #poem-popup-image {
+            max-width: 90%;
+        }
+
+        .center {
+            margin: auto;
+            width: 50%;
+            padding: 10px;
+        }
+
+
+        /* 003random inspired from custom command cam glow */
+
+        :root {
+            --rasta-glow-color1: rgba(0, 179, 0, 0.623);
+            --rasta-glow-color2: rgba(255, 217, 0, 0.541);
+            --rasta-glow-color3: rgba(255, 0, 0, 0.562);
+        }
+
+        .rasta-glow-loop {
+            animation: rasta-glow 1.5s infinite alternate;
+        }
+
+        @keyframes rasta-glow {
+            from {
+                box-shadow:
+                    0 0 10px var(--rasta-glow-color1),
+
+                    0 0 10px var(--rasta-glow-color1),
+                    0 0 20px var(--rasta-glow-color1),
+                    0 0 30px var(--rasta-glow-color1),
+
+                    0 0 40px var(--rasta-glow-color2),
+                    0 0 60px var(--rasta-glow-color2),
+                    0 0 70px var(--rasta-glow-color2);
+            }
+
+            to {
+                box-shadow:
+                    0 0 20px var(--rasta-glow-color2),
+
+                    0 0 30px var(--rasta-glow-color2),
+                    0 0 40px var(--rasta-glow-color2),
+                    0 0 50px var(--rasta-glow-color2),
+
+                    0 0 50px var(--rasta-glow-color3),
+                    0 0 60px var(--rasta-glow-color3),
+                    0 0 70px var(--rasta-glow-color3);
+            }
+        }
+    </style>
 </head>
 
 <body>
-  <div class="center">
-    <h2 class="center">Reflection - The Gauntlet</h2>
-    <p class="center">Use the 'Generate Another Poem' button below</p>
-    <div class="center">
-      <input type="range" id="couplets" name="couplets" min="2" max="20" value="4">
-      <label for="couplets">Couplets: <span id="couplets-value">4</span></label>
-      <br />
-      <input id="generate-poem" type="button" value="Generate Another Poem" />
-      <input type="checkbox" id="show-poem-info" name="show-poem-info" min="2" max="20" value="4">
-      <label for="show-poem-info">Show Poem Info</label>
-    </div>
     <div>
-      <ul id="poem-lines" style="list-style-type:none; width: 100%;"></ul>
+        <h2>Reflection - The Gauntlet</h2>
+        <p>Use the 'Generate Another Poem' button below. Check/uncheck the 'Show Poem Info' to show what poem each line
+            came from. Click the purple info text to show the poem. The 'Show Overall Info' shows the breakdown of all the poems.</p>
+        <div style="margin-bottom: 50px;">
+            <input type="range" id="couplets" name="couplets" min="2" max="20" value="4">
+            <label for="couplets">Couplets: <span id="couplets-value">4</span> - How many couplets (line pairs) to generate.</label>
+            <br />
+            <input id="generate-poem" type="button" value="Generate Another Poem" />
+            <input type="checkbox" id="show-poem-info" name="show-poem-info" min="2" max="20" value="4"
+                style="margin-left: 30px;">
+            <label for="show-poem-info">Show Poem Info</label>
+            <input type="checkbox" id="hide-glow" name="hide-glow" min="2" max="20" value="4">
+            <label for="hide-glow">Hide Glow</label>
+            <input type="checkbox" id="last-words" name="last-words" min="2" max="20" value="4"
+                style="margin-left: 50px;">
+            <label for="last-words">Show Overall Info</label>
+        </div>
+
+        <div id="poem-popup" class="rasta-glow-loop center">
+            <span id="close-x" title="Close The Poem">X</span>
+            <i id="poem-image-icon" class="material-icons" title="Show Gauntlet Image">image</i>
+            <i id="poem-image-icon-close" class="material-icons" title="Show Gauntlet Image">image</i>
+            <div id="poem-popup-content"> Poem Text Here </div>
+            <img id="poem-popup-image" src=""/>
+        </div>
+        <div id="last-words-items"></div>
+        <ul id="poem-lines" class="rasta-glow-loop center"
+            style="list-style-type:none; width: 90%; padding-bottom: 40px;"></ul>
     </div>
-  </div>
 
-  <script>
-    let couplets = 4;
+    <script>
+        let couplets = 4;
+        let lastPoem = null;
 
+        const jPoemPopupContainer = $('#poem-popup');
+        const jCloseX = $('#close-x');
+        const jPoemImageIcon = $('#poem-image-icon');
+        const jPoemImageCloseIcon = $('#poem-image-icon-close');
+        const jPoemPopupContent = $('#poem-popup-content');
+        const jPoemPopupImage = $('#poem-popup-image');
+        const jPoemLines = $('#poem-lines');
+        const jLastWords = $('#last-words');
+        const jLastWordsItems = $('#last-words-items');
 
-    document.addEventListener('DOMContentLoaded', async function () {
+        async function makeGetRequest(endpoint) {
+            //const url = `https://reflection-the-gauntlet.firebaseapp.com/${endpoint}`;
+            const url = `http://localhost:5001/reflection-the-gauntlet/us-central1/app/${endpoint}`;
 
-      $(document).on('input', '#couplets', function () {
-        couplets = +$(this).val();
-        $('#couplets-value').text(couplets);
-      });
-      $('#generate-poem').click(async () => {
-        getRandomPoem();
-      });
-      $('#show-poem-info').click(() => {
-        const value = $('#show-poem-info').prop("checked");
-        if (value) {
-          $('.item-info').show();
-        } else {
-          $('.item-info').hide();
+            const result = await fetch(url, {
+                method: 'GET',
+                mode: 'cors', // no-cors, *cors, same-origin
+                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                credentials: 'same-origin', // include, *same-origin, omit
+            });
+            return result.json();
         }
-      });
-    });
 
-    async function getRandomPoem() {
-      const url = `https://reflection-the-gauntlet.firebaseapp.com/poems?couplets=${couplets}`;
-      //const url = `http://localhost:5001/reflection-the-gauntlet/us-central1/app/poems?couplets=${couplets}`;
+        document.addEventListener('DOMContentLoaded', async function () {
 
-      const result = await fetch(url, {
-        method: 'GET',
-        mode: 'cors', // no-cors, *cors, same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        credentials: 'same-origin', // include, *same-origin, omit
-      });
-      const { items } = await result.json();
+            jPoemLines.hide();
 
-      console.log(items);
+            $(document).on('input', '#couplets', function () {
+                couplets = +$(this).val();
+                $('#couplets-value').text(couplets);
+            });
+            $('#generate-poem').click(async () => {
+                jLastWords.prop("checked", false);
+                jLastWordsItems.hide();
+                jPoemPopupContainer.hide();
+                getRandomPoem();
+            });
+            $('#show-poem-info').click(() => {
+                const value = $('#show-poem-info').prop("checked");
+                if (value) {
+                    $('.item-info').show();
+                } else {
+                    $('.item-info').hide();
+                }
+            });
+            $('#hide-glow').click(() => {
+                const value = $('#hide-glow').prop("checked");
+                if (value) {
+                    jPoemLines.removeClass('rasta-glow-loop');
+                    jPoemPopupContainer.removeClass('rasta-glow-loop');
+                } else {
+                    jPoemLines.addClass('rasta-glow-loop');
+                    jPoemPopupContainer.addClass('rasta-glow-loop');
+                }
+            });
 
-      const jpoemLines = $('#poem-lines');
-      jpoemLines.empty();
-      for (let i = 0; i < items.length; i++) {
-        if (i % 2 === 0) {
-          const jliEmpty = $('<li>');
-          jliEmpty.html('&nbsp;')
-          jpoemLines.append(jliEmpty);
+            jCloseX.click(() => {
+                jPoemPopupContainer.hide();
+                jPoemLines.show();
+            });
+
+            jPoemImageIcon.click(() => {
+                jPoemImageIcon.hide();
+                jPoemImageCloseIcon.show();
+                jPoemPopupContent.hide();             
+                jPoemPopupImage.show();
+            });
+
+            jPoemImageCloseIcon.click(() => {
+                jPoemImageIcon.show();
+                jPoemImageCloseIcon.hide();
+                jPoemPopupContent.show();             
+                jPoemPopupImage.hide();
+            });
+
+            jLastWords.click(() => {
+                const value = jLastWords.prop("checked");
+                if (value) {
+                    jLastWordsItems.show();
+                    jPoemPopupContainer.hide();
+                    jPoemLines.hide();
+                } else {
+                    jLastWordsItems.hide();
+                    if(lastPoem) {
+                        jPoemLines.show();
+                    }
+                }
+            });
+            const { linesCount, lastWords } = await makeGetRequest(`poems-info`);
+            jLastWordsItems.hide();
+            jLastWordsItems.html(lastWords.join(', '));
+            jLastWordsItems.prepend(`<h3>There were ${linesCount} lines and ${lastWords.length} unique rhyming words, below, used in my poems.</h3>`)
+        });
+
+        async function getRandomPoem() {
+            const { items } = await makeGetRequest(`poems?couplets=${couplets}`);
+
+            lastPoem = items;
+
+            jPoemImageIcon.show();
+            jPoemImageCloseIcon.hide();
+
+            jPoemLines.hide();
+            jPoemLines.empty();
+            for (let i = 0; i < items.length; i++) {
+                if (i % 2 === 0) {
+                    const jliEmpty = $('<li>');
+                    jliEmpty.html('&nbsp;')
+                    jPoemLines.append(jliEmpty);
+                }
+                const item = items[i];
+                const jli = $('<li>');
+                jli.addClass('item-line');
+                const jdiv = $('<div>');
+                const jinfospan = $('<span>');
+                jinfospan.click(async () => {
+                    const data = await makeGetRequest(`get-poem?topic=${item.topic.toLowerCase()}`);
+
+                    jLastWordsItems.hide();
+                    jPoemLines.hide();
+                    jPoemPopupContainer.show();
+                    jPoemPopupContent.show();             
+                    jPoemPopupImage.hide();
+                    jPoemImageIcon.show();
+                    jPoemImageCloseIcon.hide();
+                    jPoemPopupContent.html(`<pre>${data.text}</pre>`);
+                    jPoemPopupImage.attr('src', data.imageUrl);                  
+                });
+                jinfospan.html(`${item.topic} - ${item.poem}`);
+                jinfospan.addClass('item-info');
+                jinfospan.attr('title', 'Click here to see the poem this line came from.')
+                jinfospan.hide();
+                jdiv.append(jinfospan);
+                jli.html(item.line);
+                jli.append(jdiv);
+                jPoemLines.append(jli);
+            }
+            jPoemLines.show();
+            jPoemPopupContent.show();
+            const value = $('#show-poem-info').prop("checked");
+            if (value) {
+                $('.item-info').show();
+            } else {
+                $('.item-info').hide();
+            }
         }
-        const item = items[i];
-        const jli = $('<li>');
-        jli.addClass('item-line');
-        const jspan = $('<span>');
-        jspan.html(` -${item.topic} - ${item.poem}`);
-        jspan.addClass('item-info');
-        jspan.hide();
-        jli.html(item.line);
-        jli.append(jspan);
-        jpoemLines.append(jli);
-      }
-      const value = $('#show-poem-info').prop("checked");
-      if (value) {
-        $('.item-info').show();
-      } else {
-        $('.item-info').hide();
-      }
-    }
-  </script>
+    </script>
 </body>
 
 </html>
